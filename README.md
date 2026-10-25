@@ -92,7 +92,7 @@ The following are implemented and evidenced by executable tests (commit `27b31ce
 | Capability | Status |
 |---|---|
 | Kernel V8 operators: A (edge differences), B (successor accumulation), R (relational output) | Frozen reference |
-| Kernel V8 operator: E (persistence, V5) | Frozen reference |
+| Kernel V8 `operator_e_v5`: Phase 1 — E field via composite A→B→R; Phase 2 — persistence path A\_p → B\_p → R\_p over E\_current − E\_prior | Frozen reference |
 | Topology and field declaration (D, M) | Operational |
 | ρ parameter declaration with provenance label | Operational |
 | Observational comparison and correspondence checking | Operational |
@@ -208,7 +208,7 @@ M1 is complete when the following are demonstrated in executable, reviewable evi
 | Requirement | Description |
 |---|---|
 | Declared observable relationship | A domain D and mapping M identified and Origin-authorized. Inputs trace to declared observable sources. |
-| Calculation derived from observations | A → B → R executed on declared inputs. Result is non-synthetic. |
+| Calculation derived from observations | A → B → R executed on declared inputs. The observational domain and inputs — whether from a physical source, a declared representative example, or a rigorously labeled synthetic fixture — are open for collaborative selection before M1 begins. |
 | Traceable mathematical provenance | An Origin-authorized `EvaluationRecord` accompanies the result. The derivation chain is independently reviewable. |
 | Preservation and retrieval of relational state | The result of one cycle is preserved and available as prior relational evidence for the next. |
 | IRRS evaluation | The computation is evaluated through the IRRS capabilities applicable at the time of M1. OPEN conditions are accurately reported. |
