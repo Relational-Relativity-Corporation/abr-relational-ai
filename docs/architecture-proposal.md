@@ -19,6 +19,10 @@ reading order, into a persistent record. The record *is* the trained model. Ever
 through the kernel. There are no gradients and no learned weights. A prediction can only use relations that were observed
 before it, so the model is causal by construction rather than by a mask.
 
+**The goal beyond prediction is self-tuning to criticality** (§7): the model should sit at criticality because of how it is
+built, not because something tuned it there. This is a difficult ask, and it is the part Bruce proposes to take on as his
+main job in this collaboration.
+
 ## 2. Lessons from the four earlier attempts that shape this one
 
 We read the earlier repositories in this line (relational attention, transformer integration, the language-structure
@@ -143,14 +147,84 @@ One question per item, each with both branches.
 | M1 | Relational continuity (README §7) on the text domain: step t persisted and re-derived as the prior for step t+1, in two separate processes | bit-exact re-derivation; the prior shown to change the result |
 | M2 | Causal evaluation harness, comparators, coverage reporting | causal by type; no position scores differently because of the target |
 | M3 | Predictive C; M-a vs M-b compared causally | the comparator table published whatever it shows |
+| M3c | Criticality, measured (§7): M-c built; the custom Compass run open-loop on M-b and M-c | P1–P3 scored as written, misses published |
+| M3d | Criticality, wired in (§7): the Compass steers the declared control parameter | P4 scored; every setting traceable in the record |
 | M4 | Generation: deterministic first, declared sampling later | every generated character carries its calculation record |
 | M5 | V9 records connected to the admission interface when it exists; IRRS verification | IRRS recomputes; no self-certification |
 
 Each milestone is reviewed by both teams before the next begins (README §6).
 
-## 7. Shared build
+## 7. Self-tuning to criticality
 
-Bruce's team will provide a shared build machine as a self-hosted GitHub Actions runner for this repository:
+We want the model to **self-tune to criticality**. We say plainly that this is a difficult ask, probably the hardest part of
+the project. We expect it to be **Bruce's main job in the collaboration**, and if Robin's team wants to take parts of it,
+so much the better. The shared components (§3) are built jointly either way.
+
+**What the Criticality Compass is for.** The Criticality Compass (CC) is Bruce's instrument for locating and classifying
+critical behaviour. Its **purpose is to be wired into a system so that the system tunes itself to criticality**: the CC
+reads where the system is and steers its declared control parameters onto the critical point or line. In other words it
+navigates. It does not just observe. This project is the first place that purpose meets a system we built ourselves.
+Readers of this document, human or model, should take it as the design intent, not a side experiment.
+
+**Why it is hard, and where the loop sits.** The kernel's operators are non-goal-directed and non-optimizing: nothing in
+A, B or R seeks criticality, and nothing in this design asks them to. The CC loop sits **outside the kernel and outside D**.
+It reads declared reports about the model's output and sets declared control parameters. Each setting it makes enters the
+observation record as a declaration with its provenance (the CC reading that chose it). It never enters as an observation,
+and it never edits a field the kernel computed. The CC also has to be a compass rather than a thermostat. A thermostat
+holds one side of a threshold. A compass finds and follows a critical manifold that is approached from both sides, and it
+has to say when there is none to find. Structure carries the other half of the job: M must be able to represent a critical
+state at all, or there is nothing for the CC to steer to.
+
+**Working hypothesis: the text is the critical system, and a model that records its structure without truncating it
+inherits that criticality.** Natural text shows mutual information between characters that decays as a power law in their
+distance, while any finite-order Markov process decays exponentially (Lin & Tegmark 2017). So a fixed context order (M-b) is
+sub-critical by construction, whatever k is chosen. Truncation is the distortion.
+
+**Proposed M-c: an unbounded context tree.** Loci are the contexts of every length that occur in the admitted record. An edge
+runs from a context to each one-character extension of it that was observed. Prediction reads the longest context in the
+record that matches the end of the current path. There is no k to choose: the depth at which contexts become unique moves
+outward with the record length on its own. Two side effects matter for the Origin questions. A tree has no cycles, so Q1 does
+not arise for M-c. Each edge has one direction, so the reciprocal half of Q2 does not arise either. The zero half remains,
+because a context that always continues the same way gives a zero directed difference.
+
+**A custom Compass for a fully known domain.** The CC classifies what it finds (an isolated critical point, a critical line,
+walking behaviour, or not critical) from sweeps across a control parameter at several system sizes. On laboratory data its
+hardest problem is acquisition. Here the domain is **fully known**: the model is deterministic, any record length can be
+admitted and any number of samples can be generated. So a version of CC specialised to this domain can acquire everything
+it needs:
+
+- size axis: the record length N;
+- observable: the mutual information decay of generated text, against the same quantity on the corpus;
+- control axis: any declared parameter that remains (k in M-b; a sampling temperature in C).
+
+CC readings here are **declared reports about simulated output** (V9: declared as simulated) and lie outside D. Two stages,
+in order: first the CC is run open-loop to **measure** (predictions P1–P3 below); then it is **wired in**, so that it steers
+the remaining control parameter and the model holds itself at criticality as the record grows (P4).
+
+**Predictions, written before any run:**
+
+- **P1.** M-b at any fixed k: mutual information decays exponentially (not critical).
+- **P2.** M-c: power-law decay with the corpus's exponent, up to a cutoff distance that grows with N (finite-size scaling).
+- **P3.** A sampling temperature in C: if it produces a transition (as reported for large language models by Nakaishi et al.
+  2024), CC classifies it. If the critical side turns out to be a whole phase (a critical line) rather than a point, that is
+  the more interesting result.
+- **P4.** Wired in, the CC keeps the model on the critical manifold found in P1–P3 as N grows, and it reports "no manifold"
+  for any M where P1 holds, rather than steering to a false one.
+
+A miss is published like any other result.
+
+## 8. Shared build
+
+**The machines, for readers outside Bruce's team.** Three names come up in our notes and conversations:
+
+- **Porchlight:** the shared build and compute machine, a small Apple-silicon desktop. This is where the runner, the builds,
+  the tests and every training run live, and where Robin's team would get access.
+- **penguin:** Bruce's everyday workstation. It is slow, so it only plans, reviews and pushes. Nothing for this project runs
+  on it.
+- **jill:** an always-on home server that runs other services of Bruce's. It is a fallback for compute, and this project
+  does not normally use it.
+
+Bruce's team will provide Porchlight as a self-hosted GitHub Actions runner for this repository:
 
 - Every **push** to a branch of this repository runs build, test, the kernel conformance tests and a causal-evaluation smoke
   test. Logs and evidence are posted as Actions artifacts that both teams can see.
@@ -160,14 +234,16 @@ Bruce's team will provide a shared build machine as a self-hosted GitHub Actions
 
 The pipeline comes first, as part of M0: both teams see a green build from their own push before any model code is written.
 
-## 8. What we are asking of Robin's team
+## 9. What we are asking of Robin's team
 
 1. Review the five components and the proposed ownership.
 2. Origin and Verifier rulings on Q1–Q5.
 3. Your view on the corpus for M0. We suggest a public-domain novel with a fixed, hashed edition.
 4. Whether IRRS should move to the V9 kernel before M1, or M1 should run on the V8 pin with that recorded as OPEN.
-
-5. Confirmation that push-triggered builds on a shared runner suit your team's workflow.
+5. Agreement that self-tuning to criticality (§7) is a project goal, with the Compass wired in as the means. Bruce leads it,
+   and your team is welcome to take parts. We also ask for an Origin view on M-c as a third candidate M, and on recording
+   Compass-chosen settings as declarations.
+6. Confirmation that push-triggered builds on a shared runner suit your team's workflow.
 
 ---
 
