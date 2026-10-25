@@ -147,8 +147,8 @@ One question per item, each with both branches.
 | M1 | Relational continuity (README §7) on the text domain: step t persisted and re-derived as the prior for step t+1, in two separate processes | bit-exact re-derivation; the prior shown to change the result |
 | M2 | Causal evaluation harness, comparators, coverage reporting | causal by type; no position scores differently because of the target |
 | M3 | Predictive C; M-a vs M-b compared causally | the comparator table published whatever it shows |
-| M3c | Criticality, measured (§7): M-c built; the custom Compass run open-loop on M-b and M-c | P1–P3 scored as written, misses published |
-| M3d | Criticality, wired in (§7): the Compass steers the declared control parameter | P4 scored; every setting traceable in the record |
+| M3c | Criticality, measured (§7): M-c built; the univariate navigator built and run open-loop on M-b and M-c | P1–P3 scored as written, misses published |
+| M3d | Criticality, wired in (§7): the navigator steers the declared control parameter | P4 scored; every setting traceable in the record |
 | M4 | Generation: deterministic first, declared sampling later | every generated character carries its calculation record |
 | M5 | V9 records connected to the admission interface when it exists; IRRS verification | IRRS recomputes; no self-certification |
 
@@ -195,18 +195,18 @@ knowing, early and reliably, how close it is. Early-warning detection is half of
 ### 7.3 Approach
 
 In one paragraph, for human and model readers alike: **the model is built so that a critical state is representable
-(structure), and an instrument, the Criticality Compass, is wired into the training loop so that it measures where the
+(structure), and an instrument, a one-parameter navigator derived from the Criticality Compass, is wired into the training loop so that it measures where the
 model sits relative to the critical boundary and steers a declared control parameter to hold the model near it
 (navigation).** The kernel operators do not optimise and are not asked to. The steering happens outside the kernel, through
 declarations that are recorded with their provenance. The steps:
 
 1. **Structure.** Use a mapping M under which a critical state can exist at all (M-c below: unbounded context). A fixed
    context order cannot be critical, so no amount of steering would help there.
-2. **Measure, open-loop.** Run the Compass on the model across record lengths and control settings. It classifies what it
-   finds: an isolated critical point, a critical line, walking behaviour, or none.
-3. **Wire in, closed-loop.** The Compass steers the declared control parameter as the record grows. It keeps the model on
+2. **Measure, open-loop.** Run the navigator on the model across record lengths and settings of the one control parameter.
+   It brackets the critical value from both sides, or reports that there is none.
+3. **Wire in, closed-loop.** The navigator steers the declared control parameter as the record grows. It keeps the model on
    the ordered side of the boundary found in step 2, by a declared margin.
-4. **Verify.** Every setting the Compass makes is traceable in the record. Both teams check kernel conformance and task
+4. **Verify.** Every setting the navigator makes is traceable in the record. Both teams check kernel conformance and task
    performance separately.
 
 Key terms for anyone searching the literature: self-organized criticality, edge of chaos, critical branching, finite-size
@@ -221,13 +221,13 @@ navigates. It does not just observe. This project is the first place that purpos
 Readers of this document, human or model, should take it as the design intent, not a side experiment.
 
 **Why it is hard, and where the loop sits.** The kernel's operators are non-goal-directed and non-optimizing: nothing in
-A, B or R seeks criticality, and nothing in this design asks them to. The CC loop sits **outside the kernel and outside D**.
+A, B or R seeks criticality, and nothing in this design asks them to. The navigator loop sits **outside the kernel and outside D**.
 It reads declared reports about the model's output and sets declared control parameters. Each setting it makes enters the
-observation record as a declaration with its provenance (the CC reading that chose it). It never enters as an observation,
-and it never edits a field the kernel computed. The CC also has to be a compass rather than a thermostat. A thermostat
+observation record as a declaration with its provenance (the navigator reading that chose it). It never enters as an observation,
+and it never edits a field the kernel computed. The navigator also has to be a compass rather than a thermostat. A thermostat
 holds one side of a threshold. A compass finds and follows a critical manifold that is approached from both sides, and it
 has to say when there is none to find. Structure carries the other half of the job: M must be able to represent a critical
-state at all, or there is nothing for the CC to steer to.
+state at all, or there is nothing for the navigator to steer to.
 
 **Working hypothesis: the text is the critical system, and a model that records its structure without truncating it
 inherits that criticality.** Natural text shows mutual information between characters that decays as a power law in their
@@ -241,18 +241,26 @@ outward with the record length on its own. Two side effects matter for the Origi
 not arise for M-c. Each edge has one direction, so the reciprocal half of Q2 does not arise either. The zero half remains,
 because a context that always continues the same way gives a zero directed difference.
 
-**A custom Compass for a fully known domain.** The CC classifies what it finds (an isolated critical point, a critical line,
-walking behaviour, or not critical) from sweeps across a control parameter at several system sizes. On laboratory data its
-hardest problem is acquisition. Here the domain is **fully known**: the model is deterministic, any record length can be
-admitted and any number of samples can be generated. So a version of CC specialised to this domain can acquire everything
-it needs:
+**A one-parameter navigator, derived from the Compass.** The full CC is built for **multivariate** criticality: it tells an
+isolated critical point from a critical line or walking behaviour across several control parameters at once. This model
+most likely has **one** control parameter that matters at a time, so its criticality is probably univariate, and most of
+the full CC would sit idle. We therefore propose a small, separate component: a **univariate variant of the Compass
+navigator**. It brackets the critical value of one declared control parameter from both sides, using finite-size scaling in
+the record length, and it reports "none" when there is no critical value to find. The component is generic and reusable
+beyond this project. The full CC comes back into play only if the system turns out to be multivariate: a second control
+parameter is steered at the same time (for example a sampling temperature together with context depth, or ρ_base and χ₀),
+or P3 finds a critical line.
+
+Acquisition is usually the navigator's hardest problem on laboratory data. Here the domain is **fully known**: the model is
+deterministic, any record length can be admitted and any number of samples can be generated. So the navigator can acquire
+everything it needs:
 
 - size axis: the record length N;
 - observable: the mutual information decay of generated text, against the same quantity on the corpus;
-- control axis: any declared parameter that remains (k in M-b; a sampling temperature in C).
+- control axis: one declared parameter at a time (k in M-b; a sampling temperature in C).
 
-CC readings here are **declared reports about simulated output** (V9: declared as simulated) and lie outside D. Two stages,
-in order: first the CC is run open-loop to **measure** (predictions P1–P3 below); then it is **wired in**, so that it steers
+Navigator readings here are **declared reports about simulated output** (V9: declared as simulated) and lie outside D. Two stages,
+in order: first the navigator is run open-loop to **measure** (predictions P1–P3 below); then it is **wired in**, so that it steers
 the remaining control parameter and the model holds itself at criticality as the record grows (P4).
 
 **Predictions, written before any run:**
@@ -260,9 +268,9 @@ the remaining control parameter and the model holds itself at criticality as the
 - **P1.** M-b at any fixed k: mutual information decays exponentially (not critical).
 - **P2.** M-c: power-law decay with the corpus's exponent, up to a cutoff distance that grows with N (finite-size scaling).
 - **P3.** A sampling temperature in C: if it produces a transition (as reported for large language models by Nakaishi et al.
-  2024), CC classifies it. If the critical side turns out to be a whole phase (a critical line) rather than a point, that is
-  the more interesting result.
-- **P4.** Wired in, the CC keeps the model on the critical manifold found in P1–P3 as N grows, and it reports "no manifold"
+  2024), the navigator brackets it. If the critical side turns out to be a whole phase (a critical line) rather than a point, that is
+  the more interesting result, and the point where the full CC is needed.
+- **P4.** Wired in, the navigator keeps the model on the critical manifold found in P1–P3 as N grows, and it reports "no manifold"
   for any M where P1 holds, rather than steering to a false one.
 
 A miss is published like any other result.
@@ -294,9 +302,9 @@ The pipeline comes first, as part of M0: both teams see a green build from their
 2. Origin and Verifier rulings on Q1–Q5.
 3. Your view on the corpus for M0. We suggest a public-domain novel with a fixed, hashed edition.
 4. Whether IRRS should move to the V9 kernel before M1, or M1 should run on the V8 pin with that recorded as OPEN.
-5. Agreement that self-tuning to criticality (§7) is a project goal, with the Compass wired in as the means. Bruce leads it,
+5. Agreement that self-tuning to criticality (§7) is a project goal, with a univariate Compass navigator wired in as the means. Bruce leads it,
    and your team is welcome to take parts. We also ask for an Origin view on M-c as a third candidate M, and on recording
-   Compass-chosen settings as declarations.
+   navigator-chosen settings as declarations.
 6. Confirmation that push-triggered builds on a shared runner suit your team's workflow.
 
 ---
