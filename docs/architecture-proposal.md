@@ -202,7 +202,7 @@ A miss is published like any other result.
 
 ### 7.5 Open design questions (for both teams, not Origin)
 
-- The escape rule in C for M-c, and whether its threshold is a second control parameter.
+- The escape rule in C for M-c. We start with one control parameter, the temperature T, and the escape threshold held fixed and declared. The threshold may turn out to matter as a second control parameter. If it does, the system moves from univariate to multivariate criticality, with all that entails: the critical point may become a critical line or surface in (T, threshold), the bracket of §7.4 must be found in two dimensions, the predictions must be re-registered for the larger space, and the univariate navigator gives way to the full Criticality Compass.
 - Whether MI(d) alone can carry the critical classification (§7.2: a power law is consistent with criticality, not proof of it; a second declared readout may be needed).
 - The side of the bracket the margin sits on. The neuroscience margin (Priesemann et al. 2014) is on the short-correlation side; for a text generator the ordered side is repetition (Nakaishi et al. 2024's repetitive phase). The proposal says ordered side; the measurement in M3c should settle it.
 - The normalisation inside C that turns scores into the distribution T acts on, declared with what it keeps and discards.
