@@ -148,12 +148,26 @@ One question per item, each with both branches.
 
 Each milestone is reviewed by both teams before the next begins (README §6).
 
-## 7. What we are asking of Robin's team
+## 7. Shared build
+
+Bruce's team will provide a shared build machine as a self-hosted GitHub Actions runner for this repository:
+
+- Every **push** to a branch of this repository runs build, test, the kernel conformance tests and a causal-evaluation smoke
+  test. Logs and evidence are posted as Actions artifacts that both teams can see.
+- Only `push` triggers the runner. Pull requests from forks never execute on it. Contributions from either team come from
+  named branches in this repository (README §9), so they build automatically.
+- The runner has its own restricted account. Shell access for Robin's team can be arranged on request.
+
+The pipeline comes first, as part of M0: both teams see a green build from their own push before any model code is written.
+
+## 8. What we are asking of Robin's team
 
 1. Review the five components and the proposed ownership.
 2. Origin and Verifier rulings on Q1–Q5.
 3. Your view on the corpus for M0. We suggest a public-domain novel with a fixed, hashed edition.
 4. Whether IRRS should move to the V9 kernel before M1, or M1 should run on the V8 pin with that recorded as OPEN.
+
+5. Confirmation that push-triggered builds on a shared runner suit your team's workflow.
 
 ---
 
