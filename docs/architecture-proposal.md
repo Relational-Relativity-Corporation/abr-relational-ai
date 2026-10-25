@@ -19,7 +19,7 @@ reading order, into a persistent record. The record *is* the trained model. Ever
 through the kernel. There are no gradients and no learned weights. A prediction can only use relations that were observed
 before it, so the model is causal by construction rather than by a mask.
 
-**The goal beyond prediction is self-tuning to criticality** (§7): the model should sit at criticality because of how it is
+**The goal beyond prediction is self-tuning to near criticality** (§7): the model should sit at criticality because of how it is
 built, not because something tuned it there. This is a difficult ask, and it is the part Bruce proposes to take on as his
 main job in this collaboration.
 
@@ -154,11 +154,65 @@ One question per item, each with both branches.
 
 Each milestone is reviewed by both teams before the next begins (README §6).
 
-## 7. Self-tuning to criticality
+## 7. Objective: self-tuning to near criticality
 
-We want the model to **self-tune to criticality**. We say plainly that this is a difficult ask, probably the hardest part of
-the project. We expect it to be **Bruce's main job in the collaboration**, and if Robin's team wants to take parts of it,
-so much the better. The shared components (§3) are built jointly either way.
+### 7.1 The objective
+
+**Bruce suggests that this system should self-tune to near criticality.** That means it should hold itself, as it learns, at
+or just on the ordered side of the boundary between an ordered regime and a disordered one. It should get there and stay
+there because of how it is built and steered, not because a person picked a parameter value.
+
+This is a difficult ask, probably the hardest part of the project. We expect it to be **Bruce's main job in the
+collaboration**, and if Robin's team wants to take parts of it, so much the better. The shared components (§3) are built
+jointly either way.
+
+### 7.2 What criticality means here, and why it is worth having
+
+A system with a control parameter typically has two regimes. On the **ordered (sub-critical)** side, perturbations die out
+quickly, correlations are short and behaviour is rigid. On the **disordered (super-critical)** side, perturbations run away
+and behaviour is noise. At the **critical** boundary between them, perturbations neither die nor explode, correlations extend
+over all scales (power laws rather than exponentials), and the system responds to inputs across the widest range.
+
+Several independent literatures found that systems which process information work best at or near that boundary:
+
+- **Computation** peaks at the "edge of chaos" (Langton 1990; Bertschinger & Natschläger 2004).
+- **Dynamic range and sensitivity** are maximised at criticality (Kinouchi & Copelli 2006). Cortex shows critical avalanche
+  statistics (Beggs & Plenz 2003), with functional benefits reviewed by Shew & Plenz (2013).
+- **Living systems sit near, not exactly at, criticality.** In vivo cortex looks driven and slightly sub-critical (Priesemann
+  et al. 2014). Muñoz (2018) reviews the general picture. This is why the objective says *near* criticality: a margin on the
+  ordered side keeps the benefits without the risk of runaway.
+- **Language itself is critical in this sense.** Mutual information between characters decays as a power law with distance
+  in natural text. Any finite-order Markov model decays exponentially instead (Lin & Tegmark 2017). Separately, Sacco,
+  Sakthivadivel & Levin (2026) argue that causally masked attention in decoder-only transformers has no ordered phase at
+  all. A model that holds itself near criticality is our candidate answer to both.
+
+**How this relates to Robin's earlier work.** The framework's applied repositories detect a system's approach to an
+instability early, so that the instability can be avoided (cascade early warning, pre-critical structure before energy
+release, domain-boundary approach). That work treats the critical boundary as a hazard to warn of. This objective treats
+the same boundary as the operating point to seek and hold. The two fit together: holding a system near a boundary requires
+knowing, early and reliably, how close it is. Early-warning detection is half of what a compass needs.
+
+### 7.3 Approach
+
+In one paragraph, for human and model readers alike: **the model is built so that a critical state is representable
+(structure), and an instrument, the Criticality Compass, is wired into the training loop so that it measures where the
+model sits relative to the critical boundary and steers a declared control parameter to hold the model near it
+(navigation).** The kernel operators do not optimise and are not asked to. The steering happens outside the kernel, through
+declarations that are recorded with their provenance. The steps:
+
+1. **Structure.** Use a mapping M under which a critical state can exist at all (M-c below: unbounded context). A fixed
+   context order cannot be critical, so no amount of steering would help there.
+2. **Measure, open-loop.** Run the Compass on the model across record lengths and control settings. It classifies what it
+   finds: an isolated critical point, a critical line, walking behaviour, or none.
+3. **Wire in, closed-loop.** The Compass steers the declared control parameter as the record grows. It keeps the model on
+   the ordered side of the boundary found in step 2, by a declared margin.
+4. **Verify.** Every setting the Compass makes is traceable in the record. Both teams check kernel conformance and task
+   performance separately.
+
+Key terms for anyone searching the literature: self-organized criticality, edge of chaos, critical branching, finite-size
+scaling, closed-loop control of criticality, homeostatic regulation toward criticality.
+
+### 7.4 Details
 
 **What the Criticality Compass is for.** The Criticality Compass (CC) is Bruce's instrument for locating and classifying
 critical behaviour. Its **purpose is to be wired into a system so that the system tunes itself to criticality**: the CC
