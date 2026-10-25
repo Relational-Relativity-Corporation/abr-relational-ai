@@ -12,7 +12,10 @@ The goal is a jointly agreed specification for a small language model over chara
 
 **The goal beyond prediction is self-tuning to near criticality** (§7): the model should sit at criticality because of how it is built, not because something tuned it there. This is a difficult ask, and it is the part Bruce proposes to take on as his main job in this collaboration.
 
-**Attempt 5 is a learning instrument.** Its deliverables include recorded findings (what worked, what failed, and why) that feed the specification of a next version. The aim of that next version is to be competitive with, and eventually to outperform, conventional language models on declared comparators. Attempt 5 itself promises no performance; it promises traceable results and an honest findings log.
+**Two goals, and attempt 5 serves both as a learning instrument.**
+
+- **Goal 1, engineering.** Over several versions, a relational language model that is competitive with, and eventually outperforms, conventional language models on declared comparators, while running faster and using far less electricity. The efficiency is a hope to be measured, not a claim. Attempt 5 is exploratory and promises no performance; it promises traceable results and an honest findings log (§1.1 step 7) that feed the specification of the next version.
+- **Goal 2, discovery and shared learning.** Find out how criticality (§7), topology and governance (§8) behave in a system of this kind. Several of these topics come from statistical physics and may be unfamiliar to some readers, human or model, on either team. §11 gives a short reading ladder for each, easiest first. **Reviewers, including review agents, should work through the §11 entries for §7 and §8 before reviewing those sections.**
 
 ### 1.1 Process: specs before code, tests before code
 
@@ -26,7 +29,7 @@ Robin and Bruce agree on specifications before any code is written. At this stag
 6. **Verified and published.** The implementer commits and reports red/green per test by name. A second party verifies the red-then-green record and makes the publication decision (the push). A fresh agent with no context may serve as the acceptance check for usability and documentation.
 7. **Findings logged.** Each milestone closes with a short record of what worked, what failed and why, kept in the repository and read before the next spec is drafted.
 
-Where a test cannot be written in advance because the expected value is unknown (an exploratory measurement), the spec says so per item and a **pre-registered prediction** stands in its place, as P1–P4 do (§7.4). The shared-build pipeline (§8) is infrastructure, set up before step 3, and builds no model code. Spec order: record → M (M-a, M-b, M-c) → kernel use → C → evaluation → interfaces → navigator; the Origin-rulings spec runs alongside and gates M and kernel use. This is the method Bruce's team works by ("plan first, generate later"); we offer it for joint adoption, not as a condition.
+Where a test cannot be written in advance because the expected value is unknown (an exploratory measurement), the spec says so per item and a **pre-registered prediction** stands in its place, as P1–P4 do (§7.4). The shared-build pipeline (§9) is infrastructure, set up before step 3, and builds no model code. Spec order: record → M (M-a, M-b, M-c) → kernel use → C → evaluation → interfaces → navigator; the Origin-rulings spec runs alongside and gates M and kernel use. This is the method Bruce's team works by ("plan first, generate later"); we offer it for joint adoption, not as a condition.
 
 ## 2. Lessons from the four earlier attempts that shape this one
 
@@ -108,6 +111,7 @@ One question per item, each with both branches.
 - **Q3 Process step.** Is a declared segment of an observed text (a line of a written edition) the observed system's own process step, so that phase 2 applies? *If yes:* persistence as proposed. *If no:* phase 1 only, and continuity comes from the record alone.
 - **Q4 Relations that grow.** Edges and nodes join when first observed, so the step-(t+1) field has more edges than the prior. The frozen `operator_a_persistence` requires equal edge counts. *If a declared restriction of the pair to the common edges is admissible:* phase 2 runs over that pair, and edges outside it are NOT EVALUATED (§3.3). *If not:* phase 2 is NOT EVALUATED at any step at which the edge set grew, and continuity comes from the record alone.
 - **Q5 ρ_base and χ₀.** Which observable in a text domain supplies them? *If one can be declared:* full A → B → R. *If none:* R is NOT EVALUATED, which needs a ruling on whether C may read A → B without R.
+- **Q6 Coupling between components (asked now, needed in stage 2, §8).** Stage 2 may add components (for example governance axes) coupled to the language component through R's cross-topology term cc. The kernel requires a coupling to come from a coupling mechanism the observed system supplies. *If a declared interaction between components of one system, each observed, is admissible as Coupling provenance:* the base specs leave cc slots declared and empty, ready for stage 2. *If not:* stage 2 must find its topology inside one component (for example through M's loci), and §8's option (c) is closed.
 
 ## 6. Proposed sequence
 
@@ -115,7 +119,7 @@ Spec stages (S) come first and end in AGREED marks (§1.1). Code milestones (M) 
 
 | stage | deliverable | evidence |
 |---|---|---|
-| S0 | Spec: observation record; D (corpus, edition, hash, segment as process step); the shared-build pipeline (§8) green from both teams' pushes, building no model code | both approvals recorded; AGREED |
+| S0 | Spec: observation record; D (corpus, edition, hash, segment as process step); the shared-build pipeline (§9) green from both teams' pushes, building no model code | both approvals recorded; AGREED |
 | S1 | Spec: M-a, M-b, M-c written out, direction basis, what each keeps and discards; Q1–Q5 submitted to Origin | AGREED; Verifier declaration stage: PASS, or OPEN listed |
 | S2 | Spec: kernel use (phases, the common-edge restriction, which field C reads); C; evaluation and comparators; the two interfaces | AGREED |
 | S3 | Spec: navigator (§7.4: readout, floor, sizes, classifier, bracket, band, escape rule) and the declarations log | AGREED; P1–P4 frozen in the spec before any run |
@@ -126,6 +130,7 @@ Spec stages (S) come first and end in AGREED marks (§1.1). Code milestones (M) 
 | M3d (needs S3) | Tests first: every navigator setting lands in the declarations log with provenance; the loop can touch only T. Then the navigator wired in | RED then GREEN; P4 scored |
 | M4 | Tests first: each generated character carries a complete calculation record. Then generation: deterministic first, declared sampling later | RED then GREEN |
 | M5 | V9 records connected to the admission interface when it exists; IRRS verification | IRRS recomputes; no self-certification |
+| Stage 2 (after M4) | Spec: topology and governance (§8), drafted from the stage-1 findings, including the M-c order measurement; then the same S → M route | AGREED before any stage-2 code |
 
 Each stage is reviewed by both teams before the next begins (README §6). An agreed spec that a milestone shows to be wrong is revised as a new agreed revision (§1.1), not patched in the implementation.
 
@@ -202,31 +207,35 @@ A miss is published like any other result.
 - The side of the bracket the margin sits on. The neuroscience margin (Priesemann et al. 2014) is on the short-correlation side; for a text generator the ordered side is repetition (Nakaishi et al. 2024's repetitive phase). The proposal says ordered side; the measurement in M3c should settle it.
 - The normalisation inside C that turns scores into the distribution T acts on, declared with what it keeps and discards.
 
-### 7.6 References
+## 8. Stage 2: topology and governance
 
-- Altmann, Cristadoro & Degli Esposti 2012, PNAS 109, 11582. doi:10.1073/pnas.1117723109
-- Bak, Tang & Wiesenfeld 1987, Phys. Rev. Lett. 59, 381. doi:10.1103/PhysRevLett.59.381
-- Begleiter, El-Yaniv & Yona 2004, J. Artif. Intell. Res. 22, 385. doi:10.1613/jair.1491
-- Beggs & Plenz 2003, J. Neurosci. 23, 11167. doi:10.1523/JNEUROSCI.23-35-11167.2003
-- Bertschinger & Natschläger 2004, Neural Comput. 16, 1413. doi:10.1162/089976604323057443
-- Ebeling & Pöschel 1994, Europhys. Lett. 26, 241. doi:10.1209/0295-5075/26/4/001
-- Grassberger 2003, arXiv:physics/0307138
-- Kinouchi & Copelli 2006, Nature Phys. 2, 348. doi:10.1038/nphys289
-- Langton 1990, Physica D 42, 12. doi:10.1016/0167-2789(90)90064-V
-- Lin & Tegmark 2017, Entropy 19, 299. doi:10.3390/e19070299; arXiv:1606.06737
-- Mitchell, Crutchfield & Hraber 1993, Complex Systems 7, 89. arXiv:adap-org/9303003
-- Montemurro & Pury 2002, Fractals 10, 451. doi:10.1142/S0218348X02001257
-- Muñoz 2018, Rev. Mod. Phys. 90, 031001. doi:10.1103/RevModPhys.90.031001
-- Nakaishi, Nishikawa & Hukushima 2024, arXiv:2406.05335
-- Paninski 2003, Neural Comput. 15, 1191. doi:10.1162/089976603321780272
-- Priesemann et al. 2014, Front. Syst. Neurosci. 8, 108. doi:10.3389/fnsys.2014.00108
-- Ron, Singer & Tishby 1996, Machine Learning 25, 117. doi:10.1023/A:1026490906255
-- Sacco, Sakthivadivel & Levin 2026, Phil. Trans. R. Soc. A 384, 20250011. doi:10.1098/rsta.2025.0011; arXiv:2501.13188
-- Shen 2019, arXiv:1905.04271
-- Shew & Plenz 2013, Neuroscientist 19, 88. doi:10.1177/1073858412445487
-- Willems, Shtarkov & Tjalkens 1995, IEEE Trans. Inf. Theory 41, 653. doi:10.1109/18.382012
+### 8.1 Why topology is not optional
 
-## 8. Shared build
+**It is proven that a one-dimensional chain with short-range interactions has no ordered phase at any finite temperature** (van Hove 1950; Landau & Lifshitz, *Statistical Physics*, §163; a general theorem in Cuesta & Sánchez 2004). Sacco, Sakthivadivel & Levin (2026) prove that any autoregressive model with a finite context window maps onto such a chain, and that causally masked attention, the mechanism of today's decoder-only language models, has no ordered phase (§7.2). The conditions matter and we state them: the theorem covers short-range (local) interactions; one-dimensional chains with long-range couplings that decay as 1/r² or more slowly can order (Dyson 1969; Thouless 1969).
+
+The consequence for this project is direct. **With no ordered phase there is no phase transition, so there is no critical point to be near.** Self-tuning to near criticality (§7) therefore requires that the system escape the one-dimensional, short-range class. We will definitely need topological constraints of some kind to improve on that situation. Choosing them is **stage 2**, after the base system is operational and has produced findings.
+
+### 8.2 The design space for stage 2
+
+The known ways out of the theorem, each a candidate:
+
+- **(a) Long-range couplings.** Interactions that reach far back in the record. The power-law MI(d) of text (§7.2) suggests that language itself carries long-range structure, and M-c's unbounded context is a first step in this direction.
+- **(b) Hierarchical topology.** Sacco et al. (2026) show that hierarchical systems (cliques) hold local order inside each clique. Separately, Ising models on trees (the Bethe lattice) have an ordered phase (Baxter 1982, ch. 4). M-c's context tree is a tree, so **M-c may already escape in part**. That only holds once "order" is declared for this system's operators and readout, so it is a hypothesis for stage 1 to test (M3c measures M-c for the ordered class), not a claim.
+- **(c) Several coupled components.** A small number of coupled governance axes, each a declared component, with the couplings between them carried by R's cross-topology term cc. This depends on Origin's ruling on Q6.
+
+### 8.3 Governance, and what the base system must leave room for
+
+Systems built on language models need governance: persistent memory, separation between planning and execution roles, and an ethics layer are examples from Bruce's team's own AI practice (the ethics layer is the published Dignity Net: github.com/JoyfulAcceptance/dignity-net-public). Our hypothesis is that **governance axes may also supply the topological constraint of §8.1**, so that one design serves both roles; a working guess is about three coupled axes. That number is a hypothesis, not an established result. An earlier test of a related three-axis claim in our own work came out negative, so the stage-2 spec will test the number, not assume it.
+
+Stage 2 is specified later, but the base specs (S0–S3) must not close it off. We propose that they include:
+
+1. **Topology declared as data in M**, never a chain hard-coded in the record, the kernel use or C.
+2. **Fields with more than one component allowed**, with cc slots declared and empty in stage 1 (§3.3 already declares one component and an empty cc).
+3. **A navigator interface that accepts one or more control parameters**, used with one in stage 1; the full multivariate Compass applies once there are several (§7.4).
+4. **An order measurement in the evaluation**, alongside the criticality readout and perplexity, so that stage 1 records whether any phase is ordered.
+5. **Q6 asked now**, and the V9 ring ban checked for any cyclic topology stage 2 might propose (Q1 is the stage-1 case).
+
+## 9. Shared build
 
 **The machines, for readers outside Bruce's team.** Three names come up in our notes and conversations:
 
@@ -242,7 +251,7 @@ Bruce's team will provide Porchlight as a self-hosted GitHub Actions runner for 
 
 The pipeline comes first, in S0: both teams see a green build from their own push before any model code is written.
 
-## 9. What we are asking of Robin's team
+## 10. What we are asking of Robin's team
 
 1. Agreement on the process in §1.1 (specs before code, tests before code, the AGREED gate, the findings log), then review of the five components and the proposed ownership, with Robin's team leading the core language-model specs.
 2. Origin and Verifier rulings on Q1–Q5.
@@ -250,6 +259,59 @@ The pipeline comes first, in S0: both teams see a green build from their own pus
 4. Whether IRRS should move to the V9 kernel before M1, or M1 should run on the V8 pin with that recorded as OPEN.
 5. Agreement that self-tuning to criticality (§7) is a project goal, with a univariate Compass navigator wired in as the means. Bruce leads it, and your team is welcome to take parts. We also ask for an Origin view on M-c as a third candidate M, on recording navigator-chosen settings as declarations, and on the rule that the closed loop may set parameters of C only, never a locus, a relation, ρ_base or χ₀ (§7.4).
 6. Confirmation that push-triggered builds on a shared runner suit your team's workflow.
+7. Agreement that the base specs leave room for stage 2 (§8.3), and an Origin ruling on Q6.
+
+## 11. Further reading (start here)
+
+Ordered easiest first. Each rung is enough to read the next.
+
+**Criticality, phases and finite-size scaling (for §7).**
+
+1. Critical-lines tutorials, with quizzes: energyscholar.github.io/web-annex/diamond-node/critical-lines/ (Bruce's team's own introductory pages: critical points, critical lines, and how they are detected).
+2. Beggs & Timme 2012, "Being critical of criticality in the brain", open access: what criticality is, why it is attractive, and how claims of it go wrong.
+3. Sethna, *Statistical Mechanics: Entropy, Order Parameters, and Complexity* (free online from the author): order parameters, phases, scaling and the renormalization group at textbook level.
+4. Muñoz 2018 (Rev. Mod. Phys.): criticality in living systems, including the "near, not at" picture and its caveats.
+5. Then the primary sources in §12: Lin & Tegmark 2017 for language, Nakaishi et al. 2024 for language models, Bak, Tang & Wiesenfeld 1987 for self-organized criticality.
+
+**Order in one dimension and the ways out (for §8).**
+
+1. Sacco, Sakthivadivel & Levin 2026: the no-ordered-phase result for autoregressive models, and hierarchical escapes.
+2. Landau & Lifshitz, *Statistical Physics*, §163: the classic argument that one-dimensional chains do not order.
+3. Cuesta & Sánchez 2004: the general theorem and its exact conditions.
+4. Dyson 1969 and Thouless 1969: how long-range couplings escape.
+5. Baxter 1982, ch. 4: the Bethe lattice, where tree topology permits order.
+
+## 12. References
+
+- Altmann, Cristadoro & Degli Esposti 2012, PNAS 109, 11582. doi:10.1073/pnas.1117723109
+- Bak, Tang & Wiesenfeld 1987, Phys. Rev. Lett. 59, 381. doi:10.1103/PhysRevLett.59.381
+- Baxter 1982, *Exactly Solved Models in Statistical Mechanics*, Academic Press, ch. 4 (Bethe lattice)
+- Beggs & Plenz 2003, J. Neurosci. 23, 11167. doi:10.1523/JNEUROSCI.23-35-11167.2003
+- Beggs & Timme 2012, Front. Physiol. 3, 163. doi:10.3389/fphys.2012.00163
+- Begleiter, El-Yaniv & Yona 2004, J. Artif. Intell. Res. 22, 385. doi:10.1613/jair.1491
+- Bertschinger & Natschläger 2004, Neural Comput. 16, 1413. doi:10.1162/089976604323057443
+- Cuesta & Sánchez 2004, J. Stat. Phys. 115, 869. doi:10.1023/B:JOSS.0000022373.63640.4e
+- Dyson 1969, Commun. Math. Phys. 12, 91. doi:10.1007/BF01645907
+- Ebeling & Pöschel 1994, Europhys. Lett. 26, 241. doi:10.1209/0295-5075/26/4/001
+- Grassberger 2003, arXiv:physics/0307138
+- Kinouchi & Copelli 2006, Nature Phys. 2, 348. doi:10.1038/nphys289
+- Landau & Lifshitz, *Statistical Physics, Part 1*, 3rd ed., §163
+- Langton 1990, Physica D 42, 12. doi:10.1016/0167-2789(90)90064-V
+- Lin & Tegmark 2017, Entropy 19, 299. doi:10.3390/e19070299; arXiv:1606.06737
+- Mitchell, Crutchfield & Hraber 1993, Complex Systems 7, 89. arXiv:adap-org/9303003
+- Montemurro & Pury 2002, Fractals 10, 451. doi:10.1142/S0218348X02001257
+- Muñoz 2018, Rev. Mod. Phys. 90, 031001. doi:10.1103/RevModPhys.90.031001
+- Nakaishi, Nishikawa & Hukushima 2024, arXiv:2406.05335
+- Paninski 2003, Neural Comput. 15, 1191. doi:10.1162/089976603321780272
+- Priesemann et al. 2014, Front. Syst. Neurosci. 8, 108. doi:10.3389/fnsys.2014.00108
+- Ron, Singer & Tishby 1996, Machine Learning 25, 117. doi:10.1023/A:1026490906255
+- Sacco, Sakthivadivel & Levin 2026, Phil. Trans. R. Soc. A 384, 20250011. doi:10.1098/rsta.2025.0011; arXiv:2501.13188
+- Sethna 2006, *Statistical Mechanics: Entropy, Order Parameters, and Complexity*, Oxford University Press (free online edition from the author)
+- Shen 2019, arXiv:1905.04271
+- Shew & Plenz 2013, Neuroscientist 19, 88. doi:10.1177/1073858412445487
+- Thouless 1969, Phys. Rev. 187, 732. doi:10.1103/PhysRev.187.732
+- van Hove 1950, Physica 16, 137. doi:10.1016/0031-8914(50)90072-3
+- Willems, Shtarkov & Tjalkens 1995, IEEE Trans. Inf. Theory 41, 653. doi:10.1109/18.382012
 
 ---
 
